@@ -1,10 +1,15 @@
 % EXAMPLE COMMANDS TO RUN:
 % python control.py instance_04.lp events_04.lp elevator.lp
 
+#external at(E,F,T) : elevator(E), floor(F), time(T).
+#external todo_call(F,D,T) : floor(F), dir(D), time(T).
+#external todo_deliver(E,F,T) : elevator(E), floor(F), time(T).
+#external priority(E,D,T) : elevator(E), dir(D), time(T).
+
 % DOMAIN: Auxiliary predicates on available time points and directions
 
 % Time points of elevator moves and serve actions are limited by the horizon
-time(1..T) :- horizon(T).
+time(0..T) :- horizon(T).
 
 % Directions of elevator moves and serve actions can be down (-1) or up (1)
 dir(-1;1).
@@ -101,20 +106,18 @@ at(E,F,T) :- at(E,F,T-1), serve(E,D,T).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % 1) No elevator ever performs successive moves going into opposite directions
-sharp_turn(E,D,T) :- move(E,D,T), move(E,-D,T-1).
-#show sharp_turn/3.
-#show move(E,D,T) : sharp_turn(E,D,T).
-#show move(E,-D,T-1) : sharp_turn(E,D,T).
-:- sharp_turn(E,D,T).
+
+:- move(E, D, T), move(E, -D, T+1).
 
 % 2) Call requests are not left unserved, i.e., no elevator ever moves away
 %    from a floor when a call request into its move direction remains unserved
 
+:- at(E,F,T-1), todo_call(F,D,T-1), move(E,D,T).
 
 % 3) Delivery requests are not left unserved, i.e., no elevator ever moves away
 %    from a floor without serving any yet unserved delivery request
 
+:- at(E,F,T-1), todo_deliver(E,F,T-1), move(E,D,T).
 
 % 4) Once an elevator has started to move or serve into a direction, no move or
 %    serve action goes into the opposite direction before deliveries are served
-
