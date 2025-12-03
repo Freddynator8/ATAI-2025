@@ -104,15 +104,19 @@ at(E,F,T) :- at(E,F,T-1), serve(E,D,T).
 
 % 1) No elevator ever performs successive moves going into opposite directions
 
+:- move(E, D, T), move(E, -D, T+1).
 
 % 2) Call requests are not left unserved, i.e., no elevator ever moves away
 %    from a floor when a call request into its move direction remains unserved
 
+:- at(E,F,T-1), todo_call(F,D,T-1), move(E,D,T).
 
 % 3) Delivery requests are not left unserved, i.e., no elevator ever moves away
 %    from a floor without serving any yet unserved delivery request
 
+:- at(E,F,T-1), todo_deliver(E,F,T-1), move(E,D,T).
 
 % 4) Once an elevator has started to move or serve into a direction, no move or
 %    serve action goes into the opposite direction before deliveries are served
+
 
